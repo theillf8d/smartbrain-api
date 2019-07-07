@@ -82,7 +82,11 @@ app.post("/register", (req, res) => {
       joined: new Date()
     })
     .then(user => {
-      res.json(user);
+      res.json(user[0]);
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(400).json('unable to register')
     });
 });
 
