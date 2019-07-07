@@ -46,17 +46,21 @@ app.get("/", (req, res) => {
 
 app.get("/profile/:id", (req, res) => {
   const { id } = req.params;
-  let found = false;
-  database.users.forEach(user => {
-    if (user.id === Number(id)) {
-      found = true;
-      return res.json(user);
-    }
-  });
+  db.select("*")
+    .from("users")
+    .where({ id })
+    .then(user => {
+      if (user.length) {
+        res.json(user[0]);
+      } else {
+        res.status(400).send("Not found");
+      }
+    })
+    .catch(err => res.status(400).send("Error fetching user."));
 
-  if (!found) {
-    res.status(404).json("User not found");
-  }
+  //   if (!found) {
+  //     res.status(404).json("User not found");
+  //   }
 });
 
 app.post("/signin", (req, res) => {
@@ -64,7 +68,6 @@ app.post("/signin", (req, res) => {
     req.body.email === database.users[0].email &&
     req.body.password === database.users[0].password
   ) {
-    // res.json('success');
     res.json(database.users[0]);
   } else {
     res.status(400).json("error logging in");
@@ -85,25 +88,21 @@ app.post("/register", (req, res) => {
       res.json(user[0]);
     })
     .catch(err => {
-        console.log(err);
-        res.status(400).json('unable to register')
+      console.log(err);
+      res.status(400).json("unable to register");
     });
 });
 
 app.put("/image", (req, res) => {
   const { id } = req.body;
-  database.users.forEach(user => {
-    console.log(user.id, id);
-    if (user.id === Number(id)) {
-      found = true;
-      user.entries++;
-      return res.json(user.entries);
-    }
-  });
-
-  if (!found) {
-    res.status(404).json("User not found");
-  }
+  db('users')
+  .where('id', '=', id)
+  .increment('entries', 1)
+  .returning('entries')
+  .then(entries => {
+      res.json(entries)
+  })
+  .catch(err => res.status(400).send('Unable to fetch entries.'));
 });
 
 const port = 3000;
