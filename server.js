@@ -36,6 +36,8 @@ app.post("/register", register.handleRegister(db, bcrypt));
 
 app.put("/image", image.handleImage(db));
 
+app.post("/imageurl", (req, res) => image.handleApiCall(req, res));
+
 const port = 3000;
 app.listen(3000, () => {
   console.log(`server listening on port ${port}`);
